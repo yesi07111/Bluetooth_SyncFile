@@ -57,7 +57,7 @@ class FileManager:
         return self.get(filename)
     
     def pwd(self):
-        return self.cwd
+        return f'message::{self.cwd}'
 
     def rm(self, target):
         path = os.path.abspath(os.path.join(self.cwd, target)).replace('\\', '/')
