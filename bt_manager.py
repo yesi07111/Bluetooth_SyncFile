@@ -7,6 +7,11 @@ from file_manager import FileManager
 
 class BTFileSystem:
     def __init__(self, local_addr: str, peer_addr: str, root_directory: str='~', port: int=30, is_visual: bool=False) -> None:
+        """
+        Initializes the BTFileSystem with the local and peer Bluetooth addresses, root directory, and port.        
+        :param local_addr: The MAC address of the local Bluetooth device.        :param peer_addr: The MAC address of the peer Bluetooth device.
+        :param root_directory: The root directory to be synchronized. Defaults to '~'.        :param port: The port number for Bluetooth communication. Defaults to 30.
+        :param is_visual: A flag to indicate if visual feedback is needed. Defaults to False.        """
         self.peer_addr = peer_addr
         self.local_addr = local_addr
         self.port = port
@@ -22,6 +27,9 @@ class BTFileSystem:
         self.root_directory = root_directory
     
     def refresh_server(self):
+        """
+        Refreshes the server socket by closing the existing one and creating a new one.        """
+        
         # Close the existing socket if it exists
         if isinstance(self.server_socket, socket.socket):
             try:
@@ -41,10 +49,13 @@ class BTFileSystem:
             print(f"Error binding socket: {e}")
 
     def accept_connections(self):
+        """
+        Accepts incoming connections and processes commands received from the peer.        """
+        
         while True:
             try:
                 client_sock, _ = self.server_socket.accept()
-                data = client_sock.recv(1 << 20)
+                data = client_sock.recv(1 << 20) # Receive data (up to 1 MB)
                 data = data.decode()
 
                 command = self.parse_command(data)
@@ -65,6 +76,10 @@ class BTFileSystem:
                 self.refresh_server()
 
     def send_message(self, message: str, is_command: bool=False):
+        """        Sends a message to the peer device.
+                :param message: The message to be sent.
+        :param is_command: A flag to indicate if the message is a command. Defaults to False.        """
+        
         with socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM) as sock:
             try: 
                 if is_command:
@@ -85,6 +100,11 @@ class BTFileSystem:
                 print(f"Error sending message: {e}")
 
     def parse_command(self, command: str):
+        """
+        Parses the received command and handles file and message data.        
+        :param command: The command string received from the peer.        :return: The parsed command and its arguments, or None if the command is invalid.
+        """
+        
         if command.startswith('command::'):
             command = command[9:].split()
             command, *args = command
@@ -137,7 +157,10 @@ class BTFileSystem:
             print(command[9:])
 
 if __name__ == '__main__':
-    s = BTFileSystem("F4:7B:09:5C:D2:93", "A0:C5:89:5A:EF:F5",  'C:/Users/Yesi0711/Dropbox/PC/Downloads/Test')
+    # Example usage: Initialize the BTFileSystem with local and peer MAC addresses, root directory, and port    
+    # Main loop to continuously accept user input and send commands
+    
+    s = BTFileSystem("34:6F:24:8F:31:0A", "F4:7B:09:5C:D2:93",  'E:/ESCUELA/Ciber', 27)
 
     while True:
         msg = input()
